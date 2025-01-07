@@ -52,19 +52,23 @@ class BiopsyInfoExtractor:
         content_string = self.get_content_string()
         pattern_section = self.get_pattern('patient_name')
         patient_name = re.search(pattern_section, content_string, re.DOTALL)
+        
         if patient_name:
-            return str(patient_name.group(1)).upper()
+               return str(patient_name.group(1)).upper()
         else:
-            raise ValueError('No match found for patient name in the document')
+            return 'not found'
+            
 
     def extract_order_number(self) -> int:
         content_string = self.get_content_string()
         pattern_section = self.get_pattern('order_number')
         order_number = re.search(pattern_section, content_string, re.DOTALL)
+
         if order_number:
             return int(order_number.group(1))
         else:
-            raise ValueError('No match found for order number in the document')
+            return'not found'
+            
 
     def extract_biopsy_material(self):
         content_string = self.get_content_string()

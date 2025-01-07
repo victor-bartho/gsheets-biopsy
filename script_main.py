@@ -102,7 +102,6 @@ for file_name in os.listdir(directory_path):
             biopsy_order_number = info_extractor.get_order_number() #usded for document identification
             try:
                 #Insert data into sheet--------------------------------------------------
-                #__spreadsheet_id = '1tk_pNx8PeQOTpgmO4ibl59l9mKsotYsvqP87Hm6XJvo'
                 sheets_manipulator = SheetsManipulator(service_manager, __spreadsheet_id)
                 sheets_manipulator.copy_table_banding_to_new_row(sheet_name)
                 sheets_manipulator.append_new_row(__spreadsheet_id, cells_range, [values_to_be_appended])
