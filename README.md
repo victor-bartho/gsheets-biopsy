@@ -28,7 +28,7 @@ The repository consists of the following modules:
 - The entry point for the script.
 - Coordinates the overall workflow by invoking functions from other modules.
 - Handles user inputs and triggers the processing of PDFs.
-- Generates a log `.txt`and a `txt` list with the file names that need manual review in case of problems
+- Generates a log `.txt`and a `.txt` list with the file names that need manual review in case of problems
 - Renames every sucessfully appended PDF file as the biopsy order number. This helps the team workflow, since they need to upload the biopsy in a Drive folder renamed as the biopsy order number. I plan to automate this as well in the future.
 
 ### 2. **pdf_reader_module.py**
@@ -135,7 +135,8 @@ if service_manager.service_started('sheets', 'v4'):
 - `append_new_row(self, spreadsheet_id, cells_range, values, value_input_option='USER_ENTERED')`: Appends a new row of values to a specified range in the spreadsheet. Google Client API method that generates a HTTP requisition (Sheets API is REST based) using the parameters.
   - Parameters are what Sheets API documentation asks:
     - `spreadsheet_id`: The ID of the spreadsheet.
-    - `cells_range`: The range in the sheet where data will be appended, using A1 notation (e.g., 'Sheet1!A1'). You can check the documentation or, if prefered, my notes on it [here](https://docs.google.com/document/d/1eoYO7KY5bW0pqIzDDfeOm01HsScvDjBauoOOcqWzJGA/edit?usp=sharing) - `values`:A list of values to insert into the new row. - `value_input_option`: Option to define how input data is interpreted. Since we want to mimic all text formating, as if user was typing it manually, we choose 'USER_ENTERED'.
+    - `cells_range`: The range in the sheet where data will be appended, using A1 notation (e.g., 'Sheet1!A1'). You can check the documentation or, if prefered, my notes on it [here](https://docs.google.com/document/d/1eoYO7KY5bW0pqIzDDfeOm01HsScvDjBauoOOcqWzJGA/edit?usp=sharing) 
+    - `values`:A list of values to insert into the new row. - `value_input_option`: Option to define how input data is interpreted. Since we want to mimic all text formating, as if user was typing it manually, we choose 'USER_ENTERED'.
 - `copy_table_banding_to_new_row(self, sheet_name)`: Since the team uses table banding (a GoogleSheets styling resource), we want to copy it to new row.
 
 ### **Example Usage**:

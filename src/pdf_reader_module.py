@@ -31,7 +31,7 @@ class PDFReaderModule:
                 text_content = text_content + "\n" + page.extract_text()
         return text_content
 
-    def generate_txt_tile_with_content(self, chosen_path, file_name='teste_exportação_conteúdo_laudo.txt'):
+    def generate_txt_file_with_content(self, chosen_path, file_name='teste_exportação_conteúdo_laudo.txt'):
         text_content = self.save_content_into_string()
         with open(chosen_path + file_name, "w") as file:
             file.write(text_content)
