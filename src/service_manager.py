@@ -9,7 +9,8 @@ class ServiceManager:
         self.__started_services_listing = [] #list of tuples containing (service name, version)
         self.__services = [] #list of services instances, the Resource objects
         self.__scopes = ['https://www.googleapis.com/auth/drive.file',
-          'https://www.googleapis.com/auth/spreadsheets']
+          'https://www.googleapis.com/auth/spreadsheets', 
+          'https://www.googleapis.com/auth/cloud-vision']
         self.__my_credentials_json_file = credentials_file_path
         self.__token_file = token_file_path
 
