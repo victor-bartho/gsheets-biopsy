@@ -75,16 +75,16 @@ class BiopsyInfoExtractor:
         pattern_section = self.get_pattern('biopsy_material')
         biopsy_material = re.search(pattern_section, content_string, re.DOTALL)
         if biopsy_material:
-            return biopsy_material.group(1)
+            raw_material = biopsy_material.group(1)
+            #Handle output. In case there is more than one material, organize them into a list.
+            comma_separated_material = re.sub(r'\s*(?:\s+e\s+|\+|\/)\s*', ',', raw_material, flags=re.IGNORECASE)
+            material_list = comma_separated_material.upper().split(',')
+            organized_materials = ', '.join(material_list)
+            return organized_materials
         else:
             self.inform_no_matches('biopsy material')
             return 'not found'
 
-        # future tasks:
-        #     -1: include split markers in case there are more than one biopsy material: match.group(1).split(split_markers).
-        # My split markers can be a variable with a set of different split markers. split_markers = '[;, - eE+]+'
-        #      -2: handle letter capitalization in order to include words in the right format in the dataset that will become
-        # a standardized spreadsheet
 
     def extract_birth_date(self) -> str:
         content_string = self.get_content_string()
