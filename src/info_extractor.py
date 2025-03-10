@@ -43,10 +43,11 @@ class BiopsyInfoExtractor:
         else:
             return False
 
-    def inform_no_matches(self, info):
+    def inform_no_matches(self, info: str):
         order_number = self.get_order_number()
         patient_name = self.get_patient_name()
-        print(f'No match found for {info} in the document of order number {order_number} for patient {patient_name}')
+        print(f'Informação não encontrada para {info} na biópsia de número de pedido {order_number} para o paciente '
+            f'{patient_name}')
 
     def extract_patient_name(self) -> str:
         content_string = self.get_content_string()
@@ -82,7 +83,7 @@ class BiopsyInfoExtractor:
             organized_materials = ', '.join(material_list)
             return organized_materials
         else:
-            self.inform_no_matches('biopsy material')
+            self.inform_no_matches('MATERIAL DA BIÓPSIA')
             return 'not found'
 
 
@@ -93,7 +94,7 @@ class BiopsyInfoExtractor:
         if birth_date:
             return birth_date.group(1)
         else:
-            self.inform_no_matches('date of birth')
+            self.inform_no_matches('DATA DE NASCIMENTO')
             return 'not found'
 
     def extract_biopsy_date(self) -> str:
@@ -103,7 +104,7 @@ class BiopsyInfoExtractor:
         if biopsy_date:
             return biopsy_date.group(1)
         else:
-            self.inform_no_matches('date of biopsy')
+            self.inform_no_matches('DATA DA BIÓPSIA')
             return 'not found'
 
     def calculate_age_at_biopsy(self):
@@ -113,7 +114,8 @@ class BiopsyInfoExtractor:
             age_at_biopsy_as_timedelta = biopsy_date_as_datetime - birth_date_as_datetime
             age_at_biopsy_years = int(age_at_biopsy_as_timedelta.days / 365)
             return age_at_biopsy_years
-        print('could not find date of birth and/or biopsy_date, thus, not possible to calculate age at biopsy')
+        print('Não foi possível encontrar DATA DE NASCIMENTO e/ou DATA DA BIÓPSIA, logo, não é possível calcular IDADE ' 
+            'DO PACIENTE NO DIA DA BIÓPSIA.')
         return 'not found'
 
     def extract_chart_number(self):
@@ -123,7 +125,7 @@ class BiopsyInfoExtractor:
         if chart_number:
             return chart_number.group(1)
         else:
-            self.inform_no_matches('chart number')
+            self.inform_no_matches('NÚMERO DE PRONTUÁRIO')
             return 'not_found'
 
     def extract_block_id(self):
@@ -133,7 +135,7 @@ class BiopsyInfoExtractor:
         if block_id:
             return block_id.group(1)
         else:
-            self.inform_no_matches('block id')
+            self.inform_no_matches('ID BLOCO')
             return 'not found'
 
     def extract_block_quantity(self) -> str:
@@ -143,7 +145,7 @@ class BiopsyInfoExtractor:
         if block_quantity:
             return block_quantity.group(1)
         else:
-            self.inform_no_matches('block quantity')
+            self.inform_no_matches('QUANTIDADE DE BLOCOS')
             return 'not found'
 
     def extract_patient_initials(self):
@@ -154,7 +156,7 @@ class BiopsyInfoExtractor:
             for name in names:
                 initials.append(name[0].capitalize() + '.')
             return ''.join(initials)
-        print('As patient name was not found, not possible to inform patient initials')
+        print('Como não foi encontrado o NOME DO PACIENTE, não é possível informar INICIAIS DO PACIENTE.')
         return 'not found'
 
     def extract_collection_origin(self):
@@ -164,7 +166,7 @@ class BiopsyInfoExtractor:
         if collection_origin:
             return collection_origin.group(1)
         else:
-            self.inform_no_matches('collection origin')
+            self.inform_no_matches('ORIGEM DA COLETA')
             return 'not found'
 
     def organize_information_into_sheets_api_input_format(self): #returns a list with cell value in order
