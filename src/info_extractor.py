@@ -11,7 +11,7 @@ class BiopsyInfoExtractor:
             'biopsy_date': r'Origem.:.*?Coleta:\s*(\d{2}/\d{2}/\d{2,4})(?=.*?BIÓPSIA)',
             'chart_number': r'Cliente:.*?\((.*?)\)(?=\s*NPF:)',
             'block_id': r'(?:CRM\s?-\s?\d{5,6})[^\S\r\n]*\n?(?:.*\n){0,2}?([A-Za-z]?:?\s?-?\s?\d{2,5}[-/]\d{2,4})', 
-            'block_quantity': r'(?<=MACROSCOPIA).*?\b(\d{1,3})\s*(?:BT|B)\b.*?(?=MICROSCOPIA)',
+            'block_quantity': r'(?<=MACROSCOPIA).*?\b(\d{1,3})\s*(?:BT|B|BS)\b.*?(?=MICROSCOPIA)',
             'collection_origin': r'Origem.:\s*(.*?)(?=\s*Pedido)'}
     }
     def __init__(self, content_string, selected_pattern_dictionary: dict[str, str]): #instantiate with classmethod from_model() in order to get a dictionary
