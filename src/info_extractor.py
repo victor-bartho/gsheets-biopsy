@@ -110,7 +110,7 @@ class BiopsyInfoExtractor:
     def calculate_age_at_biopsy(self):
         birth_date_as_datetime = self.get_birth_date(return_as_datetime=True)
         biopsy_date_as_datetime = self.get_biopsy_date(return_as_datetime=True)
-        if birth_date_as_datetime != 'not found' and biopsy_date_as_datetime != 'notfound':
+        if birth_date_as_datetime != 'not found' and biopsy_date_as_datetime != 'not found':
             age_at_biopsy_as_timedelta = biopsy_date_as_datetime - birth_date_as_datetime
             age_at_biopsy_years = int(age_at_biopsy_as_timedelta.days / 365)
             return age_at_biopsy_years
@@ -243,23 +243,25 @@ class BiopsyInfoExtractor:
             date = self.extract_birth_date()
             self.set_birth_date(date)
 
-        if return_as_datetime:
+        #TODO: improve verifications to solve warning revolving datetime processing and calculations
+        if return_as_datetime and self.__birth_date != 'not found':
             return datetime.strptime(self.__birth_date, "%d/%m/%Y")
 
         return self.__birth_date
 
-    def set_birth_date(self, date):
+    def set_birth_date(self, date: str):
         self.__birth_date = date
 
     def get_biopsy_date(self, return_as_datetime = False):
         if self.__biopsy_date is None:
             date = self.extract_biopsy_date()
-            self.__biopsy_date = date
-        if return_as_datetime:
+            self.set_biopsy_date(date)
+        #TODO: improve verifications to solve warning revolving datetime processing and calculations
+        if return_as_datetime and self.__biopsy_date != 'not found':
             return datetime.strptime(self.__biopsy_date, "%d/%m/%Y")
         return self.__biopsy_date
 
-    def set_biopsy_date(self, date):
+    def set_biopsy_date(self, date: str):
         self.__biopsy_date = date
 
     def get_age_at_biopsy(self):
