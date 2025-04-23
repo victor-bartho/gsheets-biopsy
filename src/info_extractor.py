@@ -12,7 +12,10 @@ class BiopsyInfoExtractor:
             'chart_number': r'Cliente:.*?\((.*?)\)(?=\s*NPF:)',
             'block_id': r'(?:CRM\s?-\s?\d{5,6})[^\S\r\n]*\n?(?:.*\n){0,2}?([A-Za-z]?:?\s?-?\s?\d{2,5}[-/]\d{2,4})', 
             'block_quantity': r'(?<=MACROSCOPIA).*?\b(\d{1,3})\s*(?:BT|B|BS)\b.*?(?=MICROSCOPIA)',
-            'collection_origin': r'Origem.:\s*(.*?)(?=\s*Pedido)'}
+            'collection_origin': r'Origem.:\s*(.*?)(?=\s*Pedido)',
+            'conclusion_text': r'(?i)conclus[aã]o[:]?\s*(.*?)(?=\b(?:DR|DRA)\.?\s)'} #include raw text into a column for
+                    #quicker user consultation. Since they manually fill a column based on this text, it is quicker
+                    #to read on the spreadsheet than to open the pdf file to read this piece of text
     }
     def __init__(self, content_string, selected_pattern_dictionary: dict[str, str]): #instantiate with classmethod from_model() in order to get a dictionary
         self.__content_string = content_string
@@ -28,6 +31,7 @@ class BiopsyInfoExtractor:
         self.__block_id = None
         self.__block_quantity = None
         self.__collection_origin = None
+        self.__conclusion_text = None
 
 
     @classmethod
@@ -169,6 +173,17 @@ class BiopsyInfoExtractor:
             self.inform_no_matches('ORIGEM DA COLETA')
             return 'not found'
 
+
+    def extract_conclusion_text(self) -> str:
+        content_string = self.get_content_string()
+        pattern_section = self.get_pattern('conclusion_text')
+        conclusion_text = re.search(pattern_section, content_string, re.DOTALL)
+        
+        if conclusion_text:
+               return str(conclusion_text.group(1))
+        else:
+            return 'not found'
+
     def organize_information_into_sheets_api_input_format(self): #returns a list with cell value in order
 
         # for the list, if information not included in the pdf, it means that biopsy pdf archive does not provide that
@@ -189,6 +204,7 @@ class BiopsyInfoExtractor:
             'Paciente Proviniente de': '', #information about patient address or city is not included in biopsy pdf, however, spreadsheet has this column, which will be filled manually after
             'Material': self.get_biopsy_material(),
             'HD Pedido': '', #information not included in biopsy pdf, however, spreadsheet has this column, which will be filled manually after
+            'Conclusão Automatizada': self.get_conclusion_text(),
             'HD Laudo': '',
             'Nota': '',  #to be implemented
             'Neoplasia': '',
@@ -337,3 +353,12 @@ class BiopsyInfoExtractor:
 
     def set_collection_origin(self, value):
         self.__collection_origin = value
+
+    def set_conclusion_text(self, value):
+        self.__conclusion_text = value
+
+    def get_conclusion_text(self):
+        if self.__conclusion_text is None:
+            conclusion_text = self.extract_conclusion_text()
+            self.set_conclusion_text(conclusion_text)
+        return self.__conclusion_text
