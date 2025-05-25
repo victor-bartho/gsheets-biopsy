@@ -11,6 +11,20 @@ class Visuals:
     __selected_credential_file_string:str = "Nenhum arquivo de credencial selecionado"
     __pdf_dir_label: tk.Label
     __credential_file_label: tk.Label
+    __use_default_sheet: tk.BooleanVar 
+    __spreadsheet_id: str = '1wDG00ttRcT57VVPVppvAxwNvImeSJ_XVi-f5dJDmnsE'
+    __custom_spreadsheet_entry: tk.Entry
+
+    def __init__(self, pdf_btn_action, credential_btn_action, start_btn_action):
+        self.create_main_window("Projeto Banco de Dados - v1.0")
+        self.create_base_layout()
+        first_row_label = self.__selected_pdf_dir_string
+        self.create_first_row("Selecionar pasta de PDFs", first_row_label, pdf_btn_action)
+        second_row_label = self.__selected_credential_file_string
+        self.create_second_row("Selecionar arquivo de credencial", second_row_label, credential_btn_action)
+        self.create_start_btn("Iniciar", start_btn_action)
+        self.__use_default_sheet = tk.BooleanVar(value=True)
+        self.create_third_row_with_checkbox_and_entry()
 
     def create_main_window(self, title: str):
         self.__main_window = tk.Tk()
@@ -35,6 +49,15 @@ class Visuals:
     def set_selected_credential_file_string(self, file_name):
         self.__selected_credential_file_string = file_name
 
+    def get_spreadsheet_id(self) -> str:
+        return self.__spreadsheet_id
+
+    def set_spreadsheet_id(self, id:str):
+        self.__spreadsheet_id = id
+
+    def get_custom_spreadsheet_entry(self) -> tk.Entry:
+        return self.__custom_spreadsheet_entry
+
     def start_main_loop(self):
         self.__main_window.mainloop()
 
@@ -53,7 +76,7 @@ class Visuals:
         label = tk.Label(main_window, text=text)
         label.pack(pady=20)
 
-    def create_and_organize_layout(self):
+    def create_base_layout(self):
         main_window = self.get_main_window()
 
         #welcome text, a centralized string on top
@@ -80,11 +103,48 @@ class Visuals:
     def create_start_btn(self, btn_text, btn_action):
         #start button on the bottom, centralized under 2 rows of buttons
         main_window = self.get_main_window()
-        start_btn = tk.Button(main_window, text=btn_text, command=btn_action)
-        start_btn.grid(row=3, column=0, columnspan=2, pady=15)
+        self.__start_button = tk.Button(main_window, text=btn_text, command=btn_action)
+        self.__start_button.grid(row=5, column=0, columnspan=2, pady=15)
         
     def update_pdf_dir_label(self, label_text:str):
         self.__pdf_dir_label.config(text=label_text)
 
     def update_credential_file_label(self, label_text:str):
         self.__credential_file_label.config(text=label_text)
+
+    def create_third_row_with_checkbox_and_entry(self):
+        main_window = self.get_main_window()
+
+        #checkbox that is linked to self.__use_default_spreadsheet, used to capture interaction with the widget
+        checkbox = tk.Checkbutton(
+        main_window,
+        text="Usar planilha padrão",
+        variable = self.__use_default_sheet,
+        command=self.toggle_custom_sheet_entry_visibility)
+        checkbox.grid(row=3, column=1, sticky="w")
+
+        #text entry, that is invisible if checkbox is checked. If don`t want to use standard spreadsheet, Entry becomes visible
+        self.__custom_spreadsheet_entry = tk.Entry(main_window, width=45)
+        self.__custom_spreadsheet_entry.grid(row=4, column=1, columnspan=3, padx=10, pady=5)
+        self.__custom_spreadsheet_entry.insert(0, self.get_spreadsheet_id())
+        self.__custom_spreadsheet_entry.bind("<FocusOut>", self.capture_typed_spreadsheet_id)
+        self.__custom_spreadsheet_entry.grid_remove()
+
+
+    def capture_typed_spreadsheet_id(self, event):
+        typed_text = self.get_custom_spreadsheet_entry().get()
+        self.set_spreadsheet_id(typed_text.strip())
+
+    def capture_typed_spreadsheet_id_manual(self):
+        typed_text = self.get_custom_spreadsheet_entry().get()
+        self.set_spreadsheet_id(typed_text.strip())
+
+    def toggle_custom_sheet_entry_visibility(self):
+        custom_sheet_entry = self.get_custom_spreadsheet_entry()
+        if self.__use_default_sheet.get():
+            custom_sheet_entry.grid_remove()
+            self.set_spreadsheet_id('1wDG00ttRcT57VVPVppvAxwNvImeSJ_XVi-f5dJDmnsE')
+        else:
+            custom_sheet_entry.delete(0, tk.END)
+            custom_sheet_entry.insert(0, self.get_spreadsheet_id())
+            custom_sheet_entry.grid()
