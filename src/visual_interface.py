@@ -21,6 +21,9 @@ class Visuals:
     __btn_select_pdf_dir: tk.Button
     __btn_select_credential_file: tk.Button
     __checkbox_use_default_spreadsheet: tk.Checkbutton
+    __btn_start: tk.Button
+    __sheet_name_entry: tk.Entry
+    __sheet_name:str
 
     def __init__(self, pdf_btn_action, credential_btn_action, start_btn_action):
         self.__spreadsheet_id = self.__default_spreadsheet_id
@@ -32,6 +35,7 @@ class Visuals:
         self.create_first_row("Selecionar pasta de PDFs", first_row_label, pdf_btn_action)
         second_row_label = self.__selected_credential_file_string
         self.create_second_row("Selecionar arquivo de credencial", second_row_label, credential_btn_action)
+        self.create_sheet_name_row()
         self.create_start_btn("Iniciar", start_btn_action)
         self.__use_default_sheet = tk.BooleanVar(value=True)
         self.create_third_row_with_checkbox_and_entry()
@@ -103,12 +107,28 @@ class Visuals:
     def get_initial_selected_credential_file_string(self) -> str:
         return self.__initial_selected_credential_file_string
 
+    def get_btn_start(self) -> tk.Button:
+        return self.__btn_start
+
+    def get_sheet_name_entry(self) -> tk.Entry:
+        return self.__sheet_name_entry
+
+    def get_sheet_name(self) -> str:
+        return self.__sheet_name
+
+    def set_sheet_name(self, sheet_name:str):
+        self.__sheet_name = sheet_name
+
     def start_main_loop(self):
         self.__main_window.mainloop()
 
     def select_file(self, user_message) -> str:
         file_path = filedialog.askopenfilename(title=user_message)
         return file_path
+
+    def select_dir(self, user_message) -> str:
+        dir_path = filedialog.askdirectory(title=user_message)
+        return dir_path
 
     def show_dialog_message(self, dialog_message: str, message_type: str):
         match message_type:
@@ -134,7 +154,7 @@ class Visuals:
         main_window = self.get_main_window()
         self.__btn_select_pdf_dir = tk.Button(main_window, text=btn_text, command=btn_action)
         self.__btn_select_pdf_dir.grid(row=1, column=1, padx=10, pady=5, sticky="e")
-        self.__pdf_dir_label = tk.Label(main_window, text=label_text)
+        self.__pdf_dir_label = tk.Label(main_window, text=label_text, wraplength=500, anchor="w", justify="left")
         self.__pdf_dir_label.grid(row=1, column=2, padx=10, pady=5, sticky="w")
 
     def create_second_row(self, btn_text: str, label_text:str, btn_action):
@@ -142,19 +162,21 @@ class Visuals:
         main_window = self.get_main_window()
         self.__btn_select_credential_file = tk.Button(main_window, text=btn_text, command=btn_action)
         self.__btn_select_credential_file.grid(row=2, column=1, padx=10, pady=5, sticky="e")
-        self.__credential_file_label= tk.Label(main_window, text=label_text)
+        self.__credential_file_label= tk.Label(main_window, text=label_text, wraplength=500, anchor="w", justify="left")
         self.__credential_file_label.grid(row=2, column=2, padx=10, pady=5, sticky="w")
 
     def create_start_btn(self, btn_text, btn_action):
         #start button on the bottom, centralized under 2 rows of buttons
         main_window = self.get_main_window()
-        self.__start_button = tk.Button(main_window, text=btn_text, command=btn_action)
-        self.__start_button.grid(row=4, column=1, columnspan=2, pady=15)
+        self.__btn_start = tk.Button(main_window, text=btn_text, command=btn_action)
+        self.__btn_start.grid(row=5, column=1, columnspan=2, pady=15)
         
     def update_pdf_dir_label(self, label_text:str):
+        self.set_selected_pdf_dir_string(label_text)
         self.__pdf_dir_label.config(text=label_text)
 
     def update_credential_file_label(self, label_text:str):
+        self.set_selected_credential_file_string(label_text)
         self.__credential_file_label.config(text=label_text)
 
     def create_third_row_with_checkbox_and_entry(self):
@@ -187,8 +209,9 @@ class Visuals:
     def toggle_custom_sheet_entry_visibility(self):
         custom_sheet_entry = self.get_custom_spreadsheet_entry()
         if self.__use_default_sheet.get():
-            custom_sheet_entry.grid_remove()
             self.set_spreadsheet_id(self.get_default_spreadsheet_id())
+            custom_sheet_entry.insert(0, self.get_default_spreadsheet_id())
+            custom_sheet_entry.grid_remove()
         else:
             custom_sheet_entry.delete(0, tk.END)
             custom_sheet_entry.insert(0, self.get_spreadsheet_id())
@@ -230,3 +253,49 @@ class Visuals:
         initial_credential_file_string = self.get_initial_selected_credential_file_string()
         self.set_selected_credential_file_string(initial_credential_file_string)
         self.update_credential_file_label(initial_credential_file_string)
+
+    def create_sheet_name_row(self):
+        main_window = self.get_main_window()
+        sheet_name_label = tk.Label(main_window, text="Digite o nome da aba da planiha:")
+        sheet_name_label.grid(row=4, column=1, sticky="e", padx=10, pady=5)
+
+        self.__sheet_name_entry = tk.Entry(main_window, width=30)
+        self.__sheet_name_entry.grid(row=4, column=2, sticky="w", padx=10, pady=5)
+        self.__sheet_name_entry.bind("<FocusOut>", self.capture_typed_sheet_name)
+
+    def capture_typed_sheet_name(self, event):
+        typed_text = self.get_sheet_name_entry().get()
+        self.set_sheet_name(typed_text.strip())
+
+    def capture_typed_sheet_name_manual(self):
+        typed_text = self.get_sheet_name_entry().get()
+        self.set_sheet_name(typed_text.strip())
+
+    def make_all_widgets_unclickable(self):
+        #textbox does not participate, since it is supposed to always be unclickable
+        btn_select_pdf_dir = self.get_btn_select_pdf_dir()
+        btn_select_credential_file = self.get_btn_select_credential_file()
+        checkbox_use_default_spreadsheet = self.get_checkbox_use_default_spreadsheet()
+        btn_start = self.get_btn_start()
+        entry_sheet_name = self.get_sheet_name_entry()
+
+        btn_select_pdf_dir.configure(state="disabled")
+        btn_select_credential_file.configure(state="disabled")
+        checkbox_use_default_spreadsheet.configure(state="disabled")
+        btn_start.configure(state="disabled")
+        entry_sheet_name.configure(state="disabled")
+
+    def make_all_widgets_clickable(self):
+        #textbox does not participate, since it is supposed to always be unclickable
+        btn_select_pdf_dir = self.get_btn_select_pdf_dir()
+        btn_select_credential_file = self.get_btn_select_credential_file()
+        checkbox_use_default_spreadsheet = self.get_checkbox_use_default_spreadsheet()
+        btn_start = self.get_btn_start()
+        entry_sheet_name = self.get_sheet_name_entry()
+
+        btn_select_pdf_dir.configure(state="normal")
+        btn_select_credential_file.configure(state="normal")
+        checkbox_use_default_spreadsheet.configure(state="normal")
+        btn_start.configure(state="normal")
+        entry_sheet_name.configure(state="normal")
+
