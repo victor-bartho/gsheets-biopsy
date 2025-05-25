@@ -6,16 +6,26 @@ from tkinter import messagebox
 class Visuals:
 
     __main_window: tk.Tk 
-    __welcome_message: str = "Bem-vindo a exportacao de infos dos laudos. Tenha sua credencial e PDFs separados"
-    __selected_pdf_dir_string: str = "Nenhuma pasta de PDFs selecionada"
-    __selected_credential_file_string:str = "Nenhum arquivo de credencial selecionado"
+    __welcome_message: str = "Bem-vindo à exportação de informações de laudos. Tenha seu arquivo de credencial e PDFs separados."
+    __initial_selected_pdf_dir_string: str = "Nenhuma pasta de PDFs selecionada"
+    __selected_pdf_dir_string: str
+    __initial_selected_credential_file_string: str = "Nenhum arquivo de credencial selecionado"
+    __selected_credential_file_string:str
     __pdf_dir_label: tk.Label
     __credential_file_label: tk.Label
     __use_default_sheet: tk.BooleanVar 
-    __spreadsheet_id: str = '1wDG00ttRcT57VVPVppvAxwNvImeSJ_XVi-f5dJDmnsE'
+    __default_spreadsheet_id: str = '1wDG00ttRcT57VVPVppvAxwNvImeSJ_XVi-f5dJDmnsE'
+    __spreadsheet_id: str 
     __custom_spreadsheet_entry: tk.Entry
+    __text_box: tk.Text
+    __btn_select_pdf_dir: tk.Button
+    __btn_select_credential_file: tk.Button
+    __checkbox_use_default_spreadsheet: tk.Checkbutton
 
     def __init__(self, pdf_btn_action, credential_btn_action, start_btn_action):
+        self.__spreadsheet_id = self.__default_spreadsheet_id
+        self.__selected_pdf_dir_string = self.__initial_selected_pdf_dir_string
+        self.__selected_credential_file_string = self.__initial_selected_credential_file_string
         self.create_main_window("Projeto Banco de Dados - v1.0")
         self.create_base_layout()
         first_row_label = self.__selected_pdf_dir_string
@@ -25,11 +35,25 @@ class Visuals:
         self.create_start_btn("Iniciar", start_btn_action)
         self.__use_default_sheet = tk.BooleanVar(value=True)
         self.create_third_row_with_checkbox_and_entry()
+        self.create_text_box()
 
     def create_main_window(self, title: str):
         self.__main_window = tk.Tk()
         self.__main_window.title(title)
-        self.__main_window.geometry("700x300")
+        self.__main_window.geometry("850x300")
+        #for i in range(3):
+        #    self.__main_window.columnconfigure(i, weight=1)
+        self.__main_window.columnconfigure(0, weight=1)
+        self.__main_window.columnconfigure(1, weight=1)
+        self.__main_window.columnconfigure(2, weight=1)
+        self.__main_window.columnconfigure(3, weight=1)
+        self.__main_window.rowconfigure(0, weight=1)
+        self.__main_window.rowconfigure(1, weight=1)
+        self.__main_window.rowconfigure(2, weight=1)
+        self.__main_window.rowconfigure(3, weight=1)
+        self.__main_window.rowconfigure(4, weight=1)
+        self.__main_window.rowconfigure(5, weight=1)
+        self.__main_window.rowconfigure(6, weight=1)
 
     def get_main_window(self) -> tk.Tk | None:
         return self.__main_window
@@ -58,6 +82,27 @@ class Visuals:
     def get_custom_spreadsheet_entry(self) -> tk.Entry:
         return self.__custom_spreadsheet_entry
 
+    def get_default_spreadsheet_id(self) -> str:
+        return self.__default_spreadsheet_id
+
+    def get_text_box(self) -> tk.Text:
+        return self.__text_box
+
+    def get_btn_select_pdf_dir(self) -> tk.Button:
+        return self.__btn_select_pdf_dir
+
+    def get_btn_select_credential_file(self) -> tk.Button:
+        return self.__btn_select_credential_file
+
+    def get_checkbox_use_default_spreadsheet(self) -> tk.Checkbutton:
+        return self.__checkbox_use_default_spreadsheet
+
+    def get_initial_selected_pdf_dir_string(self) -> str:
+        return self.__initial_selected_pdf_dir_string
+
+    def get_initial_selected_credential_file_string(self) -> str:
+        return self.__initial_selected_credential_file_string
+
     def start_main_loop(self):
         self.__main_window.mainloop()
 
@@ -81,30 +126,30 @@ class Visuals:
 
         #welcome text, a centralized string on top
         welcome_text = self.get_welcome_message()
-        title = tk.Label(main_window, text=welcome_text, font=("Arial", 14)) 
-        title.grid(row=0, column=0, columnspan=2, pady=10)
+        title = tk.Label(main_window, text=welcome_text, font=("Arial", 13)) 
+        title.grid(row=0, column=1, columnspan=2, pady=10)
 
     def create_first_row(self, btn_text: str, label_text:str, btn_action):
         #set first role, containing btn to select pdf directory and selected_directory name
         main_window = self.get_main_window()
-        first_row_btn = tk.Button(main_window, text=btn_text, command=btn_action)
-        first_row_btn.grid(row=1, column=0, padx=10, pady=5, sticky="e")
+        self.__btn_select_pdf_dir = tk.Button(main_window, text=btn_text, command=btn_action)
+        self.__btn_select_pdf_dir.grid(row=1, column=1, padx=10, pady=5, sticky="e")
         self.__pdf_dir_label = tk.Label(main_window, text=label_text)
-        self.__pdf_dir_label.grid(row=1, column=1, padx=10, pady=5, sticky="w")
+        self.__pdf_dir_label.grid(row=1, column=2, padx=10, pady=5, sticky="w")
 
     def create_second_row(self, btn_text: str, label_text:str, btn_action):
         #set first role, containing btn to select pdf directory and selected_directory name
         main_window = self.get_main_window()
-        second_row_btn = tk.Button(main_window, text=btn_text, command=btn_action)
-        second_row_btn.grid(row=2, column=0, padx=10, pady=5, sticky="e")
+        self.__btn_select_credential_file = tk.Button(main_window, text=btn_text, command=btn_action)
+        self.__btn_select_credential_file.grid(row=2, column=1, padx=10, pady=5, sticky="e")
         self.__credential_file_label= tk.Label(main_window, text=label_text)
-        self.__credential_file_label.grid(row=2, column=1, padx=10, pady=5, sticky="w")
+        self.__credential_file_label.grid(row=2, column=2, padx=10, pady=5, sticky="w")
 
     def create_start_btn(self, btn_text, btn_action):
         #start button on the bottom, centralized under 2 rows of buttons
         main_window = self.get_main_window()
         self.__start_button = tk.Button(main_window, text=btn_text, command=btn_action)
-        self.__start_button.grid(row=5, column=0, columnspan=2, pady=15)
+        self.__start_button.grid(row=4, column=1, columnspan=2, pady=15)
         
     def update_pdf_dir_label(self, label_text:str):
         self.__pdf_dir_label.config(text=label_text)
@@ -116,16 +161,16 @@ class Visuals:
         main_window = self.get_main_window()
 
         #checkbox that is linked to self.__use_default_spreadsheet, used to capture interaction with the widget
-        checkbox = tk.Checkbutton(
+        self.__checkbox_use_default_spreadsheet = tk.Checkbutton(
         main_window,
         text="Usar planilha padrão",
         variable = self.__use_default_sheet,
         command=self.toggle_custom_sheet_entry_visibility)
-        checkbox.grid(row=3, column=1, sticky="w")
+        self.__checkbox_use_default_spreadsheet.grid(row=3, column=1, sticky="e")
 
         #text entry, that is invisible if checkbox is checked. If don`t want to use standard spreadsheet, Entry becomes visible
         self.__custom_spreadsheet_entry = tk.Entry(main_window, width=45)
-        self.__custom_spreadsheet_entry.grid(row=4, column=1, columnspan=3, padx=10, pady=5)
+        self.__custom_spreadsheet_entry.grid(row=3, column=2, columnspan=3, padx=10, pady=5, sticky="w")
         self.__custom_spreadsheet_entry.insert(0, self.get_spreadsheet_id())
         self.__custom_spreadsheet_entry.bind("<FocusOut>", self.capture_typed_spreadsheet_id)
         self.__custom_spreadsheet_entry.grid_remove()
@@ -143,8 +188,45 @@ class Visuals:
         custom_sheet_entry = self.get_custom_spreadsheet_entry()
         if self.__use_default_sheet.get():
             custom_sheet_entry.grid_remove()
-            self.set_spreadsheet_id('1wDG00ttRcT57VVPVppvAxwNvImeSJ_XVi-f5dJDmnsE')
+            self.set_spreadsheet_id(self.get_default_spreadsheet_id())
         else:
             custom_sheet_entry.delete(0, tk.END)
             custom_sheet_entry.insert(0, self.get_spreadsheet_id())
             custom_sheet_entry.grid()
+
+    def create_text_box(self):
+        main_window = self.get_main_window()
+
+        scrollbar = tk.Scrollbar(main_window)
+        self.__text_box = tk.Text(main_window, wrap="word", height=20,  width=50,yscrollcommand=scrollbar.set)
+        scrollbar.config(command=self.__text_box.yview)
+        self.__text_box.grid(row=6, column=1, columnspan=2, padx=10, pady=10, sticky="we")
+        self.__text_box.config(state="disabled")
+        self.__text_box.grid_remove()
+
+    def append_string_text_box(self, text:str):
+        text_box = self.get_text_box()
+        text_box.config(state="normal")
+        text_box.insert(tk.END, text + "\n")
+        text_box.config(state="disabled")
+
+    def toggle_text_box_visibility(self):
+        main_window = self.get_main_window()
+        text_box = self.get_text_box()
+
+        if text_box.winfo_ismapped(): #if it is visible at the grid
+            text_box.grid_remove()
+            main_window.geometry("850x300")
+        else:
+            text_box.grid(row=6, column=1, columnspan=2, padx=10, pady=10, sticky="we")
+            main_window.geometry("850x600")
+
+    def reset_pdf_dir_selection(self):
+        initial_pdf_selection_string = self.get_initial_selected_pdf_dir_string()
+        self.set_selected_pdf_dir_string(initial_pdf_selection_string)
+        self.update_pdf_dir_label(initial_pdf_selection_string)
+
+    def reset_credential_file_selection(self):
+        initial_credential_file_string = self.get_initial_selected_credential_file_string()
+        self.set_selected_credential_file_string(initial_credential_file_string)
+        self.update_credential_file_label(initial_credential_file_string)
