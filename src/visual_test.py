@@ -8,6 +8,7 @@ from datetime import date
 import logging
 import cowsay
 from visual_interface import Visuals
+import threading
 
 
 #Logging methods
@@ -27,7 +28,7 @@ def add_file_to_review_list(review_list_path, review_file_name, message=''):
                 file.write(f'Arquivo: {review_file_name}\n')
 
 
-#defining button click actions and creating visual interface
+#defining button click actions
 def pdf_btn_action():
     dir_path = gui.select_dir("Selecione uma pasta")
     if dir_path != "":
@@ -81,13 +82,17 @@ def start_btn_action():
         gui.toggle_text_box_visibility()
         #call function to start script
         gui.make_all_widgets_unclickable()
-        execute_script()
+        threading.Thread(target=execute_script, daemon=True).start()
+        #execute_script()
 
 def execute_script():
     directory_path = gui.get_selected_pdf_dir_string()
     credentials_path = gui.get_selected_credential_file_string()
     credentials_path_dir = os.path.dirname(credentials_path)
     token_path = os.path.join(credentials_path_dir, 'my_token.json')
+    spreadsheet_id = gui.get_spreadsheet_id()
+    sheet_name = gui.get_sheet_name()
+    cells_range = sheet_name
 
     #Logging setup
     today_date = date.today().strftime('%d.%m.%Y')
@@ -121,6 +126,71 @@ def execute_script():
         print_and_log('ERROR',f'Erro ao autenticar e iniciar serviço. Detalhes do erro: \n{e}', log)
         log.error(f'Erro ao autenticar e iniciar serviço. Detalhes do erro: \n{e}\n\n Traceback para consulta:\n{traceback_register}\n\n')
         raise ConnectionError
+
+    #Iterate through a directory and append data for each biopsy file
+    for file_name in os.listdir(directory_path):
+        old_file_path = os.path.join(directory_path, file_name)
+        #if it is a pdf, then start loop. if it is not, ignore, since it may be a logging report or folder
+        if os.path.isfile(old_file_path) and old_file_path.split('.')[-1].lower() == 'pdf':
+            #Read PDF----------------------------------------------------------------
+            pdf_reader_module = PDFReaderModule(old_file_path)
+            text_content = pdf_reader_module.save_content_into_string()
+
+            #Extract information fom PDF----------------------------------------------
+            info_extractor = BiopsyInfoExtractor.from_model(text_content, 'model_1', gui.append_string_text_box)
+            if info_extractor.validate_biopsy():
+                print_and_log('INFO',f'-Lendo arquivo: {file_name}', log)
+                values_to_be_appended = info_extractor.organize_information_into_sheets_api_input_format()
+                biopsy_order_number = info_extractor.get_order_number() #used for document identification
+
+                try:
+                    #Insert data into sheet--------------------------------------------------
+                    sheets_manipulator = SheetsManipulator(service_manager, spreadsheet_id)
+                    sheets_manipulator.copy_table_banding_to_new_row(sheet_name)
+                    sheets_manipulator.append_new_row(spreadsheet_id, cells_range, [values_to_be_appended])
+                    print_and_log('INFO',f'Informações do arquivo {file_name} (pedido: {biopsy_order_number}) '
+                                    f'incluídas na planilha com sucesso', log)
+
+                except Exception as e:
+                    gui.append_string_text_box(f'Erro ao inserir informações do arquivo na planilha de Google Sheets. '
+                    f'O arquivo {file_name} deverá ser inserido manualmente. \n Detalhes do erro:\n {e}')
+                    traceback_register = traceback.format_exc()
+                    log.error(f'Erro ao inserir informações do arquivo {file_name} na planilha de Google Sheets. Detalhes do '
+                        f'erro:\n {e} \n\n Traceback para consulta:\n{traceback_register}\n\n')
+                    add_file_to_review_list(review_list_path, file_name, 'Realizar inserção manual de dados na planilha')
+                    continue
+
+
+                try:
+                    #Finish renaming file in directory---------------------------------------
+                    new_file_path = os.path.join(directory_path, str(biopsy_order_number) + '.pdf')
+                    new_file_path = os.path.normpath(new_file_path)
+                    #check if file_name already exists. In case it does, rename with a sequence letter
+                    if os.path.exists(new_file_path):
+                        n = 2
+                        alternative_file_path = os.path.join(directory_path, f'{biopsy_order_number}_{n}.pdf')
+                        while os.path.exists(alternative_file_path):
+                            n+=1
+                            alternative_file_path = os.path.join(directory_path, f'{biopsy_order_number}_{n}.pdf')
+                        gui.append_string_text_box(f'biópsia de pedido nº {biopsy_order_number} foi lida repetidamente')
+                        new_file_path = alternative_file_path
+                    os.rename(old_file_path, new_file_path)
+                    log.info(f'Arquivo {file_name} (pedido: {biopsy_order_number}) renomeado com sucesso')
+                    log.info(f'OK: arquivo {file_name} (pedido: {biopsy_order_number}).\n')
+                except Exception as e:
+                    gui.append_string_text_box(f'Erro ao renomear o arquivo na pasta {directory_path}. O arquivo {file_name} deverá'
+                        f'ser renomeado manualmente. \n Detalhes do erro:\n{e}')
+                    traceback_register = traceback.format_exc()
+                    log.error(
+                        f'Erro ao renomear o arquivo {file_name} na pasta. Detalhes do '
+                        f'erro:\n {e} \n\n Traceback para consulta:\n{traceback_register}\n\n')
+                    add_file_to_review_list(review_list_path, file_name, 'Iserção ok. Renomear arquivo manualmente')
+                    continue
+            else:
+                gui.append_string_text_box(f'Documento {file_name} não é uma biópsia válida, e, portanto, será pulado.'
+                    f'\n Faça verificação manual')
+
+    gui.append_string_text_box(cowsay.get_output_string('cow', 'Fim do script!'))
 
         
 def main():

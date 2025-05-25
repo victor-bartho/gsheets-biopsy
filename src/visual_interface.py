@@ -241,8 +241,10 @@ class Visuals:
             text_box.grid_remove()
             main_window.geometry("850x300")
         else:
-            text_box.grid(row=6, column=1, columnspan=2, padx=10, pady=10, sticky="we")
             main_window.geometry("850x600")
+            text_box.grid(row=6, column=1, columnspan=2, padx=10, pady=10, sticky="we")
+        
+        main_window.update()
 
     def reset_pdf_dir_selection(self):
         initial_pdf_selection_string = self.get_initial_selected_pdf_dir_string()
@@ -278,12 +280,14 @@ class Visuals:
         checkbox_use_default_spreadsheet = self.get_checkbox_use_default_spreadsheet()
         btn_start = self.get_btn_start()
         entry_sheet_name = self.get_sheet_name_entry()
+        spreadsheet_id_entry = self.get_custom_spreadsheet_entry()
 
         btn_select_pdf_dir.configure(state="disabled")
         btn_select_credential_file.configure(state="disabled")
         checkbox_use_default_spreadsheet.configure(state="disabled")
         btn_start.configure(state="disabled")
         entry_sheet_name.configure(state="disabled")
+        spreadsheet_id_entry.configure(state="disabled")
 
     def make_all_widgets_clickable(self):
         #textbox does not participate, since it is supposed to always be unclickable
@@ -292,10 +296,12 @@ class Visuals:
         checkbox_use_default_spreadsheet = self.get_checkbox_use_default_spreadsheet()
         btn_start = self.get_btn_start()
         entry_sheet_name = self.get_sheet_name_entry()
+        spreadsheet_id_entry = self.get_custom_spreadsheet_entry()
 
         btn_select_pdf_dir.configure(state="normal")
         btn_select_credential_file.configure(state="normal")
         checkbox_use_default_spreadsheet.configure(state="normal")
         btn_start.configure(state="normal")
         entry_sheet_name.configure(state="normal")
+        spreadsheet_id_entry.configure(state="normal")
 

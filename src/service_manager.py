@@ -26,7 +26,7 @@ class ServiceManager:
                 # first, we create a flow object (contains methods to integrate OAuth with Google Authentication)
                 flow = InstalledAppFlow.from_client_secrets_file(self.__my_credentials_json_file, self.__scopes)
                 # next, using, authentication information from json file, we request a token, that is what Google API request for usage
-                creds = flow.run_local_server(port=8080)
+                creds = flow.run_local_server(port=8080, prompt="consent", include_granted_scopes="true")
                 # Save the credentials for the next run
                 with open(self.__token_file, "w") as token:
                     token.write(creds.to_json())

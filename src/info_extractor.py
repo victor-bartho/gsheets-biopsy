@@ -1,7 +1,6 @@
 import re
 from datetime import datetime
 
-
 class BiopsyInfoExtractor:
     __pattern_models = {
         'model_1': {'patient_name': r"Cliente:\s*(.*?)(?=\s*\()",
@@ -14,9 +13,10 @@ class BiopsyInfoExtractor:
             'block_quantity': r'(?<=MACROSCOPIA).*?\b(\d{1,3})\s*(?:BT|B|BS)\b.*?(?=MICROSCOPIA)',
             'collection_origin': r'Origem.:\s*(.*?)(?=\s*Pedido)'}
     }
-    def __init__(self, content_string, selected_pattern_dictionary: dict[str, str]): #instantiate with classmethod from_model() in order to get a dictionary
+    def __init__(self, content_string, selected_pattern_dictionary: dict[str, str], notify_func): #instantiate with classmethod from_model() in order to get a dictionary
         self.__content_string = content_string
         self.__patterns = selected_pattern_dictionary
+        self.notify_func = notify_func
         self.__biopsy_material = None
         self.__patient_name = None
         self.__patient_initials = None
@@ -31,9 +31,9 @@ class BiopsyInfoExtractor:
 
 
     @classmethod
-    def from_model(cls, content_string, model):
+    def from_model(cls, content_string, model, notify_func):
         if model in cls.__pattern_models:
-            return cls(content_string, cls.__pattern_models[model])
+            return cls(content_string, cls.__pattern_models[model], notify_func)
         else:
             raise ValueError(f'unknown model: {model}')
 
@@ -44,10 +44,13 @@ class BiopsyInfoExtractor:
             return False
 
     def inform_no_matches(self, info: str):
-        order_number = self.get_order_number()
-        patient_name = self.get_patient_name()
-        print(f'Informação não encontrada para {info} na biópsia de número de pedido {order_number} para o paciente '
-            f'{patient_name}')
+            order_number = self.get_order_number()
+            patient_name = self.get_patient_name()
+            if order_number and patient_name:
+                self.notify_func(f'Informação não encontrada para {info} na biópsia de número de pedido {order_number} '
+                                 f'para o paciente {patient_name}')
+        #print(f'Informação não encontrada para {info} na biópsia de número de pedido {order_number} para o paciente '
+        #    f'{patient_name}')
 
     def extract_patient_name(self) -> str:
         content_string = self.get_content_string()
@@ -114,7 +117,7 @@ class BiopsyInfoExtractor:
             age_at_biopsy_as_timedelta = biopsy_date_as_datetime - birth_date_as_datetime
             age_at_biopsy_years = int(age_at_biopsy_as_timedelta.days / 365)
             return age_at_biopsy_years
-        print('Não foi possível encontrar DATA DE NASCIMENTO e/ou DATA DA BIÓPSIA, logo, não é possível calcular IDADE ' 
+        self.notify_func('Não foi possível encontrar DATA DE NASCIMENTO e/ou DATA DA BIÓPSIA, logo, não é possível calcular IDADE ' 
             'DO PACIENTE NO DIA DA BIÓPSIA.')
         return 'not found'
 
@@ -156,7 +159,7 @@ class BiopsyInfoExtractor:
             for name in names:
                 initials.append(name[0].capitalize() + '.')
             return ''.join(initials)
-        print('Como não foi encontrado o NOME DO PACIENTE, não é possível informar INICIAIS DO PACIENTE.')
+        self.notify_func('Como não foi encontrado o NOME DO PACIENTE, não é possível informar INICIAIS DO PACIENTE.')
         return 'not found'
 
     def extract_collection_origin(self):
