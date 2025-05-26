@@ -29,7 +29,7 @@ class Visuals:
         self.__spreadsheet_id = self.__default_spreadsheet_id
         self.__selected_pdf_dir_string = self.__initial_selected_pdf_dir_string
         self.__selected_credential_file_string = self.__initial_selected_credential_file_string
-        self.create_main_window("Projeto Banco de Dados - v1.0")
+        self.create_main_window("Projeto Banco de Dados - v1.1")
         self.create_base_layout()
         first_row_label = self.__selected_pdf_dir_string
         self.create_first_row("Selecionar pasta de PDFs", first_row_label, pdf_btn_action)
@@ -210,6 +210,7 @@ class Visuals:
         custom_sheet_entry = self.get_custom_spreadsheet_entry()
         if self.__use_default_sheet.get():
             self.set_spreadsheet_id(self.get_default_spreadsheet_id())
+            custom_sheet_entry.delete(0, tk.END)
             custom_sheet_entry.insert(0, self.get_default_spreadsheet_id())
             custom_sheet_entry.grid_remove()
         else:
