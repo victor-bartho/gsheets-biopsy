@@ -29,7 +29,7 @@ class Visuals:
         self.__spreadsheet_id = self.__default_spreadsheet_id
         self.__selected_pdf_dir_string = self.__initial_selected_pdf_dir_string
         self.__selected_credential_file_string = self.__initial_selected_credential_file_string
-        self.create_main_window("Projeto Banco de Dados - v1.1")
+        self.create_main_window("Projeto Banco de Dados - v1.2")
         self.create_base_layout()
         first_row_label = self.__selected_pdf_dir_string
         self.create_first_row("Selecionar pasta de PDFs", first_row_label, pdf_btn_action)

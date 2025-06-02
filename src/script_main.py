@@ -111,6 +111,7 @@ def execute_script():
     review_list_path = os.path.join(log_folder, 'Lista de Arquivos Pendentes.txt')
     
 
+    log.info('Extração Informação Laudos - Versão 1.2 \n')
     print_and_log('INFO', 'Iniciando execução do script:', log)
 
 
